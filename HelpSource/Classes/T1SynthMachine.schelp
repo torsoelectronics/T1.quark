@@ -1,0 +1,108 @@
+TITLE::T1SynthMachine
+SUMMARY::Play synths using a Torso Electronics T-1
+CATEGORIES::Torso
+RELATED::Classes/T1Device
+
+DESCRIPTION::
+
+This is a convenient interface for the Torso Electronics T-1 algorithmic
+sequencer.
+
+This interface allows you to easily associate a SynthDef name with a midi
+channel and have the T-1 play those synths.
+
+Visit LINK::https://torsoelectronics.com/:: for more information about the
+Torso Electronics T-1.
+
+SUBSECTION::Making a SynthDef for the T-1
+
+This interface is compatible with a quite standard way of writing SynthDefs.
+That being said, there are some important conventions that SynthDefs need to
+meet to be used by this class:
+
+LIST::
+	## Use gated envelopes, for example LINK::Classes/Env#*adsr::
+	## Use a code::\gate:: argument to open/close the abovementioned envelope
+	## A code::\freq:: argument to allow setting the pitch of the synth (or
+whatever you want to set using it)
+	## An code::\amp:: argument to set the volume of the synth using midi
+	velocity
+::
+
+CLASSMETHODS::
+METHOD::start
+
+Start the interface. This will automatically connect the T-1 using See
+LINK::Classes/T1Device::.
+
+INSTANCEMETHODS::
+METHOD::setSynthDefForChannel
+ARGUMENT::synthDefName
+ARGUMENT::midiChannel
+
+Associate a SynthDef name with a midi channel. All notes sent by the T-1 via
+this midi channel will trigger the spawning of the synth with this name.
+
+EXAMPLES::
+
+CODE::
+// Start the Synth Machine and play the default synth
+(
+z = T1SynthMachine.start();
+z.setSynthDefForChannel(synthDefName: \default, midiChannel: 0)
+)
+
+// Let's make a simple sine synth and attach it to midi channel 2
+(
+fork{
+    // Make SynthDef \t1sine
+    SynthDef(\t1sine,{|out=0, amp=0.5, gate=1, freq=444, attack=0.01, decay=0.3, sustain=0.5, release=1, pan=0|
+        var env = Env.adsr(attack, decay, sustain, release).kr(gate: gate, doneAction: 2);
+        var sig = SinOsc.ar(freq);
+
+        sig = Pan2.ar(sig, pan);
+
+        Out.ar(out, sig * env * amp * 0.5)
+    }).add;
+
+    // Wait for synthdef to be added
+    Server.local.sync;
+
+    // Now set the T1 to trigger it on midi channel 2
+    z.setSynthDefForChannel(synthDefName: \t1sine, midiChannel: 1)
+}
+)
+
+// Now, let's make an fm synth and attach it to midi channel 3
+(
+fork{
+    // Make SynthDef \t1sine
+    SynthDef(\t1fm7,{|out=0, amp=0.15, gate=1, freq=444, attack=0.01, decay=0.3,
+	sustain=0.5, release=1, pan=0, feedback=1|
+        var env = Env.adsr(attack, decay, sustain, release).kr(gate: gate, doneAction: 2);
+		var ctls = [
+			// freq, phase, amp
+			[freq * Rand(1.0,1.01), 0, 0.75],
+			[freq * Rand(1.0,1.01), 0, 0.6],
+			[freq * Rand(1.0,1.01), 0, 0.64],
+			[freq * Rand(1.0,1.01), 0, 0.74],
+			[freq * Rand(1.0,1.01), 0, 0.82],
+			[freq * Rand(1.0,1.01), 0, 0.35]
+		];
+        // Choose between all of the 32 DX7 algorithms. See the FM7 help file for more information.
+        var fmAlgo = 7;
+        var sig = FM7.arAlgo(fmAlgo, ctls, feedback);
+
+        sig = Pan2.ar(sig, pan);
+
+        Out.ar(out, sig * env * amp * 0.25)
+    }).add;
+
+    // Wait for synthdef to be added
+    Server.local.sync;
+
+    // Now set the T1 to trigger it on midi channel 2
+    z.setSynthDefForChannel(synthDefName: \t1fm7, midiChannel: 2)
+}
+)
+::

@@ -1,0 +1,119 @@
+TITLE::T1Device
+SUMMARY::MIDI Interface for the Torso Electronics T-1
+CATEGORIES::Torso
+RELATED::Classes/T1SynthMachine
+
+DESCRIPTION::
+
+This class is a convenient way to connect the Torso Electronics T-1 to
+SuperCollider. It allows you to set callback functions for a range of midi
+events, including notes, clock, etc.
+
+If you just want to play synths with your T-1 in SuperCollider,
+LINK::Classes/T1SynthMachine:: is the easier-to-use choice.
+
+Visit LINK::https://torsoelectronics.com/:: for more information about the
+Torso Electronics T-1.
+
+CLASSMETHODS::
+METHOD::start
+ARGUMENT::debugMode
+
+This will start the T1 interface. If debugMode is true, it will print midi
+events to the post window.
+
+INSTANCEMETHODS::
+METHOD::connect
+Connect to the T-1. This is done automatically when calling the start method,
+but can be done manually by calling this.
+
+METHOD::setNoteOnFunc
+ARGUMENT::newFunc
+
+Set the responder function for a Note On event sent by the T-1.
+
+code::
+t.setNoteOnFunc(
+	{|val, num, chan|
+		"%: NoteOn message received: val %, num %, chan %".format(this.controllerName, val, num, chan).postln
+	}
+)
+::
+
+METHOD::setNoteOffFunc
+ARGUMENT::newFunc
+
+Set the responder function for a Note Off event sent by the T-1.
+
+code::
+t.setNoteOffFunc(
+	{|val, num, chan|
+		"%: NoteOff message received: val %, num %, chan %".format(this.controllerName, val, num, chan).postln
+	}
+)
+::
+
+METHOD::setStartFunc
+ARGUMENT::newFunc
+
+Set the responder function for a Start event (when you press start on the device) sent by the T-1.
+
+code::
+t.setStartFunc(
+	{|val, num, chan|
+		"%: Start message received: val %, num %, chan %".format(this.controllerName, val, num, chan).postln
+	}
+)
+::
+
+
+METHOD::setStopFunc
+ARGUMENT::newFunc
+
+Set the responder function for a Stop event (when you press start on the device) sent by the T-1.
+
+code::
+t.setStopFunc(
+	{|val, num, chan|
+		"%: Stop message received: val %, num %, chan %".format(this.controllerName, val, num, chan).postln
+	}
+)
+::
+
+EXAMPLES::
+
+code::
+// Map the \default synth to all midi channels on the t1
+(
+var numChannels = 16;
+var numNotesPerChannel = 128;
+
+// Start the device if it isn't already started
+t = t ?? {
+    T1Device.start()
+};
+
+// Nested arrays that will contain the synths for each channel
+~synths = numChannels.collect{
+    numNotesPerChannel.collect{
+        nil
+    }
+};
+
+// Note on
+t.setNoteOnFunc({|val, num, chan|
+    var ampScale = 0.5;
+
+    ~synths[chan][num] = Synth(\default,
+        [\freq, num.midicps.postln, \gate, 1, \amp, val / 128.0 * ampScale]
+    );
+
+});
+
+// Note off
+t.setNoteOffFunc({|val, num, chan|
+    ~synths[chan][num].release(0.01);
+});
+
+)
+::
