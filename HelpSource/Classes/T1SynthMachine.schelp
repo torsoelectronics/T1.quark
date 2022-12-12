@@ -1,7 +1,7 @@
 TITLE::T1SynthMachine
 SUMMARY::Play synths using a Torso Electronics T-1
 CATEGORIES::Torso
-RELATED::Classes/T1Device
+RELATED::Classes/T1Device,Classes/T1Track
 
 DESCRIPTION::
 

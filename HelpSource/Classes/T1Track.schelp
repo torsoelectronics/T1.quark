@@ -1,0 +1,64 @@
+TITLE::T1Track
+SUMMARY::An object that contains a Torso Elecronics T-1 track's responders
+CATEGORIES::Torso
+RELATED::Classes/T1Device,Classes/T1Track,Classes/T1SynthMachine
+
+DESCRIPTION::
+This class is used internally by LINK::Classes/T1Track:: to represent all the
+dispatcher/responder functions used to receive midi events from the T-1. You do
+not need to use this directly.
+
+Visit LINK::https://torsoelectronics.com/:: for more information about the
+Torso Electronics T-1.
+
+CLASSMETHODS::
+METHOD::knobNames
+
+METHOD::new
+ARGUMENT::midiChannel
+ARGUMENT::ccNumbers
+ARGUMENT::debugMode
+ARGUMENT::permanent
+
+INSTANCEMETHODS::
+METHOD::noteOnDispatcher
+
+METHOD::noteOffDispatcher
+
+METHOD::channel
+
+METHOD::ccResponders
+
+METHOD::ccNums
+
+METHOD::init
+ARGUMENT::midiChannel
+ARGUMENT::ccNumbers
+ARGUMENT::debugMode
+ARGUMENT::permanent
+
+METHOD::setMidiChannel
+ARGUMENT::newChannel
+
+METHOD::setCCNums
+ARGUMENT::newCCNums
+
+METHOD::registerDefaultResponderFuncs
+
+METHOD::setCCResponderFunc
+ARGUMENT::knobName
+ARGUMENT::newFunc
+
+METHOD::setNoteOnFunc
+ARGUMENT::newFunc
+
+METHOD::setNoteOffFunc
+ARGUMENT::newFunc
+
+
+
+EXAMPLES::
+
+CODE::
+// Nothing to see here...
+::

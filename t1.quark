@@ -4,6 +4,7 @@
   version: "0.0.1",
   schelp: "T1Device",
   dependencies: [
+      "ddwVoicer"
   ],
   url: "https://github.com/torsoelectronics/T1.quark",
   license: "GPL",

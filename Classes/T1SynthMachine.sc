@@ -37,13 +37,13 @@ T1SynthMachine{
 
     var <t1device;
 
-    *start{
-        ^super.new.init()
+    *start{|permanent=true|
+        ^super.new.init(permanent)
     }
 
-    init{
+    init{|permanent|
         "%: Starting T1 device".format(this.class.name).postln;
-        t1device = T1Device.start(debugMode: false);
+        t1device = T1Device.start(debugMode: false, permanent: permanent);
 
         // Voices are handled as Synths. One per note in each channel
         synths = numChannels.collect{
@@ -58,32 +58,35 @@ T1SynthMachine{
             this.setSynthDefForChannel(synthDefName, index)
         };
 
-        // Set note on functionality
-        t1device.setNoteOnFunc({|val, num, chan|
-            var ampScale = 0.5;
-            var synthdefForThisChannel = synthDefAssignments[chan];
+        16.do{|trackNum|
 
-            // Set up arguments for the synth
-            var args = [
-                \freq, num.midicps,
-                \gate, 1,
-                \amp, val / 128.0 * ampScale
-            ];
+            // Set note on functionality
+            t1device.setNoteOnFunc(trackNum, {|val, num, chan|
+                var ampScale = 0.5;
+                var synthdefForThisChannel = synthDefAssignments[chan];
 
-            // Spawn synth
-            synths[chan][num] = Synth(
-                synthdefForThisChannel,
-                args
-            );
+                // Set up arguments for the synth
+                var args = [
+                    \freq, num.midicps,
+                    \gate, 1,
+                    \amp, val / 128.0 * ampScale
+                ];
 
-        });
+                // Spawn synth
+                synths[chan][num] = Synth(
+                    synthdefForThisChannel,
+                    args
+                );
 
-        // Set note off functionality
-        t1device.setNoteOffFunc({|val, num, chan|
-            // FIXME: This is an arbitrary release time
-            synths[chan][num].release();
-        });
+            });
 
+            // Set note off functionality
+            t1device.setNoteOffFunc(trackNum, {|val, num, chan|
+                // FIXME: This is an arbitrary release time
+                synths[chan][num].release();
+            });
+
+        };
     }
 
     setSynthDefForChannel{|synthDefName, midiChannel|
