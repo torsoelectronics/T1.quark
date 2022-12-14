@@ -70,6 +70,8 @@ T1SynthMachine{
                     \freq, num.midicps,
                     \gate, 1,
                     \amp, val / 128.0 * ampScale
+                    \pitch, num,
+                    \velocity, val
                 ];
 
                 // Spawn synth
@@ -82,8 +84,14 @@ T1SynthMachine{
 
             // Set note off functionality
             t1device.setNoteOffFunc(trackNum, {|val, num, chan|
-                // FIXME: This is an arbitrary release time
-                synths[chan][num].release();
+                // Check if synth has gate argument
+                var hasGate = SynthDescLib.global.synthDescs.at(synthDefAssignments[chan]).hasGate;
+               
+                // Only release synth if it has gate argument
+                if (hasGate) {
+                  // FIXME: This is an arbitrary release time
+                 synths[chan][num].release();
+                }
             });
 
         };

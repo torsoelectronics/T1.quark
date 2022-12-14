@@ -21,8 +21,8 @@ That being said, there are some important conventions that SynthDefs need to
 meet to be used by this class:
 
 LIST::
-	## Use gated envelopes, for example LINK::Classes/Env#*adsr::
-	## Use a code::\gate:: argument to open/close the abovementioned envelope
+	## Use a code::\gate:: argument to open/close gated envelopes, e.g.
+	LINK::Classes/Env#*adsr::
 	## A code::\freq:: argument to allow setting the pitch of the synth (or
 whatever you want to set using it)
 	## An code::\amp:: argument to set the volume of the synth using midi
