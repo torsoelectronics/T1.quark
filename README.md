@@ -1,6 +1,6 @@
 # SuperCollider interface for the Torso Electronics T-1
 
-![https://torsoelectronics.com/](assets/torso.png)
+![https://torsoelectronics.com/](assets/t1.jpg)
 
 This SuperCollider package adds easy-to-use interfaces for the [Torso Electronics T-1 Algorithmic Sequencer](https://torsoelectronics.com/t-1/).
 
