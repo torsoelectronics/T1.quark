@@ -69,7 +69,7 @@ T1SynthMachine{
                 var args = [
                     \freq, num.midicps,
                     \gate, 1,
-                    \amp, val / 128.0 * ampScale
+                    \amp, val / 128.0 * ampScale,
                     \pitch, num,
                     \velocity, val
                 ];
