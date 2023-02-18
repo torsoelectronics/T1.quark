@@ -37,25 +37,32 @@ T1Device{
     // Used to hack MIDIIn to say whether our controller is connected or not
     var connectMethod = 'isT1Connected';
 
+    var <initialized = false;
+
     *start{|debugMode=false, permanent=true|
         ^super.new.init(debugMode, permanent)
     }
 
     init{|debugMode, permanent|
-        fixed = permanent;
-        this.connect();
+        if(initialized.not, {
+            fixed = permanent;
+            this.connect();
 
-        tracks = numTracks.collect{|midiChannel|
-            T1Track.new(midiChannel: midiChannel, debugMode: debugMode, permanent: permanent);
-        };
+            tracks = numTracks.collect{|midiChannel|
+                T1Track.new(midiChannel: midiChannel, debugMode: debugMode, permanent: permanent);
+            };
 
-        // Set default responders if necessary
-        if(debugMode, {
-            "%: Using default responder functions".format(this.controllerName).postln;
-            this.registerDefaultResponderFuncs()
-        });
+            // Set default responders if necessary
+            if(debugMode, {
+                "%: Using default responder functions".format(this.controllerName).postln;
+                this.registerDefaultResponderFuncs()
+            });
 
-        this.postWelcome();
+            this.postWelcome();
+
+        }, {
+            "%: Already initialized...".format(this.controllerName).postln;
+        })
     }
 
     registerDefaultResponderFuncs{

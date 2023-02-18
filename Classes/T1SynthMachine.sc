@@ -38,67 +38,74 @@ T1SynthMachine{
     var <t1device;
     var <>latency = 0.2;
 
+    var <initialized = false;
+
     *start{|permanent=true|
         ^super.new.init(permanent)
     }
 
     init{|permanent|
-        "%: Starting T1 device".format(this.class.name).postln;
-        t1device = T1Device.start(debugMode: false, permanent: permanent);
+        if(initialized.not, {
+            "%: Starting T1 device".format(this.class.name).postln;
+            t1device = T1Device.start(debugMode: false, permanent: permanent);
 
-        // Voices are handled as Synths. One per note in each channel
-        synths = numChannels.collect{
-            notesPerChannel.collect{
-                nil
-            }
-        };
-
-        // Set default synth as default synth for all channels
-        synthDefAssignments = \default!numChannels;
-        synthDefAssignments.do{|synthDefName, index|
-            this.setSynthDefForChannel(synthDefName, index)
-        };
-
-        16.do{|trackNum|
-
-            // Set note on functionality
-            t1device.setNoteOnFunc(trackNum, {|val, num, chan|
-                var ampScale = 0.5;
-                var synthdefForThisChannel = synthDefAssignments[chan];
-
-                // Set up arguments for the synth
-                var args = [
-                    \freq, num.midicps,
-                    \gate, 1,
-                    \amp, val / 128.0 * ampScale,
-                    \pitch, num,
-                    \velocity, val
-                ];
-
-                // Spawn synth
-                synths[chan][num] = Synth.basicNew(
-                    synthdefForThisChannel,
-                    Server.default
-                );
-
-                // Set arguments
-                Server.default.sendBundle(latency, synths[chan][num].newMsg(nil, args));
-
-            });
-
-            // Set note off functionality
-            t1device.setNoteOffFunc(trackNum, {|val, num, chan|
-                // Check if synth has gate argument
-                var hasGate = SynthDescLib.global.synthDescs.at(synthDefAssignments[chan]).hasGate;
-               
-                // Only release synth if it has gate argument
-                if (hasGate && synths[chan][num].notNil) {
-                    // FIXME: This is an arbitrary release time
-                    Server.default.sendBundle(latency, synths[chan][num].setMsg(\gate, 0));
+            // Voices are handled as Synths. One per note in each channel
+            synths = numChannels.collect{
+                notesPerChannel.collect{
+                    nil
                 }
-            });
+            };
 
-        };
+            // Set default synth as default synth for all channels
+            synthDefAssignments = \default!numChannels;
+            synthDefAssignments.do{|synthDefName, index|
+                this.setSynthDefForChannel(synthDefName, index)
+            };
+
+            16.do{|trackNum|
+
+                // Set note on functionality
+                t1device.setNoteOnFunc(trackNum, {|val, num, chan|
+                    var ampScale = 0.5;
+                    var synthdefForThisChannel = synthDefAssignments[chan];
+
+                    // Set up arguments for the synth
+                    var args = [
+                        \freq, num.midicps,
+                        \gate, 1,
+                        \amp, val / 128.0 * ampScale,
+                        \pitch, num,
+                        \velocity, val
+                    ];
+
+                    // Spawn synth
+                    synths[chan][num] = Synth.basicNew(
+                        synthdefForThisChannel,
+                        Server.default
+                    );
+
+                    // Set arguments
+                    Server.default.sendBundle(latency, synths[chan][num].newMsg(nil, args));
+
+                });
+
+                // Set note off functionality
+                t1device.setNoteOffFunc(trackNum, {|val, num, chan|
+                    // Check if synth has gate argument
+                    var hasGate = SynthDescLib.global.synthDescs.at(synthDefAssignments[chan]).hasGate;
+
+                    // Only release synth if it has gate argument
+                    if (hasGate && synths[chan][num].notNil) {
+                        // FIXME: This is an arbitrary release time
+                        Server.default.sendBundle(latency, synths[chan][num].setMsg(\gate, 0));
+                    }
+                });
+            };
+
+            initialized = true;
+        }, {
+            "%: T1 device already intialized".format(this.class.name).postln;
+        })
     }
 
     setSynthDefForChannel{|synthDefName, midiChannel|
