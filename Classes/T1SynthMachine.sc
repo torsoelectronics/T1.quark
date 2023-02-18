@@ -36,6 +36,7 @@ T1SynthMachine{
     var notesPerChannel = 128;
 
     var <t1device;
+    var <>latency = 0.2;
 
     *start{|permanent=true|
         ^super.new.init(permanent)
@@ -75,10 +76,13 @@ T1SynthMachine{
                 ];
 
                 // Spawn synth
-                synths[chan][num] = Synth(
+                synths[chan][num] = Synth.basicNew(
                     synthdefForThisChannel,
-                    args
+                    Server.default
                 );
+
+                // Set arguments
+                Server.default.sendBundle(latency, synths[chan][num].newMsg(nil, args));
 
             });
 
@@ -88,9 +92,9 @@ T1SynthMachine{
                 var hasGate = SynthDescLib.global.synthDescs.at(synthDefAssignments[chan]).hasGate;
                
                 // Only release synth if it has gate argument
-                if (hasGate) {
-                  // FIXME: This is an arbitrary release time
-                 synths[chan][num].release();
+                if (hasGate && synths[chan][num].notNil) {
+                    // FIXME: This is an arbitrary release time
+                    Server.default.sendBundle(latency, synths[chan][num].setMsg(\gate, 0));
                 }
             });
 
@@ -98,6 +102,16 @@ T1SynthMachine{
     }
 
     setSynthDefForChannel{|synthDefName, midiChannel|
+        var hasGate = SynthDescLib.global.synthDescs.at(synthDefAssignments[midiChannel]).hasGate;
+
+        if (hasGate) {
+          synths[midiChannel].do {|synth|
+            if (synth.notNil) {
+              synth.release;
+            }
+          };
+        };
+
         synthDefAssignments[midiChannel] = synthDefName;
     }
 }
