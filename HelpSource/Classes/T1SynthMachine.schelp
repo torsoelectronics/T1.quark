@@ -39,6 +39,7 @@ INSTANCEMETHODS::
 METHOD::setSynthDefForChannel
 ARGUMENT::synthDefName
 ARGUMENT::midiChannel
+ARGUMENT::args
 
 Associate a SynthDef name with a midi channel. All notes sent by the T-1 via
 this midi channel will trigger the spawning of the synth with this name.

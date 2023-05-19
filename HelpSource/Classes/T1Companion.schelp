@@ -1,0 +1,40 @@
+TITLE::T1Companion
+SUMMARY::A premade set of interfaces mapped directly to the T1
+CATEGORIES::Torso
+RELATED::Classes/T1SynthMachine
+
+DESCRIPTION::
+
+The T1Companion is a class that will load and setup a range of ready-made setups
+and map them to your T1, ready to play immediately.
+
+If you just want to play synths with your T-1 in SuperCollider,
+LINK::Classes/T1SynthMachine:: is mechanism behind the scenes here.
+
+Visit LINK::https://torsoelectronics.com/:: for more information about the
+Torso Electronics T-1.
+
+CLASSMETHODS::
+
+METHOD::start
+ARGUMENT::setupName
+The name of the setup file (no file extension) as a symbol
+
+INSTANCEMETHODS::
+
+METHOD:: availableSetups
+A list of setup names currently available
+
+EXAMPLES::
+
+code::
+
+// Boot server and then start T1 Companion. After that: Press play on your T1 and have fun!
+(
+s.waitForBoot{
+	Server.local.sync;
+	t = T1Companion.start(setupName: \default)
+}
+)
+
+::
