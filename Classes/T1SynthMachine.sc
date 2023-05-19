@@ -31,6 +31,7 @@ T1SynthMachine{
 
     // An array containing a synth def name per midi channel. The index is the midi channel, the item is the synthdef name as a symbol
     var <synthDefAssignments;
+    var <synthDefArgs;
     var <synths;
     var numChannels = 16;
     var notesPerChannel = 128;
@@ -57,6 +58,7 @@ T1SynthMachine{
             };
 
             // Set default synth as default synth for all channels
+            synthDefArgs = Array.newClear(numChannels);
             synthDefAssignments = \default!numChannels;
             synthDefAssignments.do{|synthDefName, index|
                 this.setSynthDefForChannel(synthDefName, index)
@@ -68,6 +70,7 @@ T1SynthMachine{
                 t1device.setNoteOnFunc(trackNum, {|val, num, chan|
                     var ampScale = 0.5;
                     var synthdefForThisChannel = synthDefAssignments[chan];
+                    var argsForThisChannel = synthDefArgs[chan];
 
                     // Set up arguments for the synth
                     var args = [
@@ -76,7 +79,7 @@ T1SynthMachine{
                         \amp, val / 128.0 * ampScale,
                         \pitch, num,
                         \velocity, val
-                    ];
+                    ] ++ argsForThisChannel;
 
                     // Spawn synth
                     synths[chan][num] = Synth.basicNew(
@@ -108,7 +111,7 @@ T1SynthMachine{
         })
     }
 
-    setSynthDefForChannel{|synthDefName, midiChannel|
+    setSynthDefForChannel{|synthDefName, midiChannel, args|
         var hasGate = SynthDescLib.global.synthDescs.at(synthDefAssignments[midiChannel]).hasGate;
 
         if (hasGate) {
@@ -120,5 +123,6 @@ T1SynthMachine{
         };
 
         synthDefAssignments[midiChannel] = synthDefName;
+        synthDefArgs[midiChannel] = args;
     }
 }
